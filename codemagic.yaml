@@ -5,19 +5,25 @@ workflows:
     environment:
       java: 17
     scripts:
-      - name: Install Gradle
-        script: |
-          brew install gradle || true
-          gradle --version
+      - name: Show ALL files in repo
+        script: find . -type f | sort
       - name: Build debug APK
         script: |
-          # Find build.gradle wherever it is
-          BUILD=$(find . -name "build.gradle" -not -path "*/app/*" | head -1)
-          DIR=$(dirname "$BUILD")
-          echo "Project root: $DIR"
-          cd "$DIR"
-          gradle wrapper
+          # Find the app/build.gradle to locate project root
+          APP_GRADLE=$(find . -name "build.gradle" -path "*/app/build.gradle" | head -1)
+          if [ -z "$APP_GRADLE" ]; then
+            echo "ERROR: Could not find app/build.gradle anywhere!"
+            echo "Files in repo:"
+            find . -type f | sort
+            exit 1
+          fi
+          PROJECT_ROOT=$(dirname $(dirname "$APP_GRADLE"))
+          echo "Project root found: $PROJECT_ROOT"
+          cd "$PROJECT_ROOT"
+          echo "Files here:"
+          ls -la
+          gradle wrapper --gradle-version 8.4
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace 2>&1 | tail -50
     artifacts:
       - "**/outputs/apk/debug/*.apk"

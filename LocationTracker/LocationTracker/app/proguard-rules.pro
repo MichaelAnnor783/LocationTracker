@@ -1,3 +1,0 @@
--keep class com.locationtracker.app.** { *; }
--keep class com.google.android.gms.** { *; }
--keepattributes *Annotation*

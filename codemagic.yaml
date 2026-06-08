@@ -5,10 +5,16 @@ workflows:
     environment:
       java: 17
     scripts:
+      - name: Show repo structure
+        script: find . -maxdepth 3 -name "gradlew" -o -name "build.gradle" | head -20
       - name: Build debug APK
         script: |
-          cd LocationTracker
+          # Find gradlew wherever it is
+          GRADLEW=$(find . -name "gradlew" | head -1)
+          DIR=$(dirname "$GRADLEW")
+          echo "Found gradlew at: $GRADLEW"
+          cd "$DIR"
           chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
-      - LocationTracker/app/build/outputs/apk/debug/*.apk
+      - "**/outputs/apk/debug/*.apk"

@@ -5,16 +5,19 @@ workflows:
     environment:
       java: 17
     scripts:
-      - name: Show repo structure
-        script: find . -maxdepth 3 -name "gradlew" -o -name "build.gradle" | head -20
+      - name: Install Gradle
+        script: |
+          brew install gradle || true
+          gradle --version
       - name: Build debug APK
         script: |
-          # Find gradlew wherever it is
-          GRADLEW=$(find . -name "gradlew" | head -1)
-          DIR=$(dirname "$GRADLEW")
-          echo "Found gradlew at: $GRADLEW"
+          # Find build.gradle wherever it is
+          BUILD=$(find . -name "build.gradle" -not -path "*/app/*" | head -1)
+          DIR=$(dirname "$BUILD")
+          echo "Project root: $DIR"
           cd "$DIR"
+          gradle wrapper
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
     artifacts:
       - "**/outputs/apk/debug/*.apk"
